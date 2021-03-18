@@ -40,6 +40,7 @@ root = tk.Tk()
 root.title("Eliminar reserva")
 root.config(bg="#dfe4ea")
 root.geometry("800x500+300+100")
+root,resizable(0,0)
 root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(file = "img/revision.png"))
 tk.Label(root, text='Administración "Hotel Girasol"', bg="#eccc68", font=title).place(x=0, y=0, width=800, height=70)
 
