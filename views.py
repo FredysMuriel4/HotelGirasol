@@ -1,13 +1,21 @@
 import tkinter as tk
 from tkinter import StringVar
+from tkinter import messagebox
 
 
 class Views:
 	def login(self):
-		def index():
-			root.destroy()
-			self.index()
-
+		def enter():
+			fun_empty = empty(user.get(), password.get())
+			if fun_empty != 0:
+				if user.get() == "Admin" and password.get() == "Administracion":
+					root.destroy()
+					self.index()
+			else:
+				messagebox.showerror(message="Usuario o conraseña incorrectos, verifique", title="Error")
+		def empty(user, password):
+			if user == '' or password == '':
+				return 0
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
 		font_answers = ("Arial", 15)
@@ -28,7 +36,7 @@ class Views:
 		password = StringVar()
 		tk.Label(root, text="Contraseña:", font=font_base, bg="#dfe4ea").place(x=410, y=250)
 		tk.Entry(root, textvariable = password, bg="#ced6e0", show="•", font=font_answers).place(x=410, y=290, width=250, height=35)
-		tk.Button(root, text="Ingresar", font=font_base, bg="#eccc68", command=index).place(x=470, y=350)
+		tk.Button(root, text="Ingresar", font=font_base, bg="#eccc68", command=enter).place(x=470, y=350)
 		root.mainloop()
 
 	def index(self):
