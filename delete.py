@@ -8,7 +8,7 @@ def index():
 
 def show():
 	if userId.get() == "1001947524":
-		condition.set("Pendiente")
+		condition.set("Activo")
 		name.set("Fredys")
 		last_name.set("Muriel")
 		age.set("19 años")
@@ -16,26 +16,28 @@ def show():
 		r_day.set("14/03/2021")
 		c_day.set("5")
 		t_room.set("Empresarial")
-		night_p.set("250000")
-		calc_total = int(night_p.get()) * int(c_day.get())
-		total.set(str(calc_total))
 		userId.set("")
 	else:
 		messagebox.showerror(message="No se ha encontrado el documento.", title="Error")
 
-def pay():
-	if condition.get() == "Pendiente":
-		condition.set("Activo")
-		messagebox.showinfo(message="Pago efectuado.", title="Proceso exitoso")
-	else:
-		messagebox.showerror(message="Error", title="Error")
+def delete():
+		condition.set("")
+		name.set("")
+		last_name.set("")
+		age.set("")
+		tel.set("")
+		r_day.set("")
+		c_day.set("")
+		t_room.set("")
+		userId.set("")
+		messagebox.showinfo(message="Eliminación exitosa")
 
 title = ("Arial", 20)
 font_base = ("Arial", 18)
 font_answers = ("Arial", 15)
 
 root = tk.Tk()
-root.title("Reservas")
+root.title("Eliminar reserva")
 root.config(bg="#dfe4ea")
 root.geometry("800x500+300+100")
 root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(file = "img/revision.png"))
@@ -96,18 +98,6 @@ tr.insert(0,"Tipo de habitación")
 tr.configure(state='disabled')
 tr.place(x=30, y=380, width=200)
 
-night_p = StringVar()
-np = tk.Entry(root, textvariable = night_p, bg="#ced6e0", font=font_answers)
-np.insert(0,"Precio por noche")
-np.configure(state='disabled')
-np.place(x=270, y=380, width=200)
-
-total = StringVar()
-to = tk.Entry(root, textvariable = total, bg="#ced6e0", font=font_answers)
-to.insert(0,"Total a pagar")
-to.configure(state='disabled')
-to.place(x=510, y=380, width=200)
-
-tk.Button(root, text="Efectuar Pago", font=font_answers, bg="#eccc68", command=pay).place(x=300, y=430)
+tk.Button(root, text="Eliminar Reserva", font=font_answers, bg="#eccc68", command=delete).place(x=300, y=430)
 
 root.mainloop()
