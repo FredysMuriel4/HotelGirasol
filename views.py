@@ -10,6 +10,8 @@ class Views:
 			if fun_empty != 0:
 				if user.get() == "Admin" and password.get() == "Administracion":
 					root.destroy()
+					global username
+					username = user.get()
 					self.index()
 			else:
 				messagebox.showerror(message="Usuario o conraseña incorrectos, verifique", title="Error")
@@ -38,7 +40,6 @@ class Views:
 		tk.Entry(root, textvariable = password, bg="#ced6e0", show="•", font=font_answers).place(x=410, y=290, width=250, height=35)
 		tk.Button(root, text="Ingresar", font=font_base, bg="#eccc68", command=enter).place(x=470, y=350)
 		root.mainloop()
-
 	def index(self):
 		def exit():
 			root.destroy()
@@ -69,7 +70,7 @@ class Views:
 		tk.Label(root, text='Administración "Hotel Girasol"', bg="#eccc68", font=title).place(x=0, y=0, width=800, height=70)
 
 		tk.Button(root, text="Salir", font=font_base, bg="#eccc68", command=exit).place(x=700, y=90)
-		tk.Label(root, text='Bienvenido '+" @Username", bg="#dfe4ea", font=font_answers).place(x=20, y=100)
+		tk.Label(root, text='Bienvenido '+username, bg="#dfe4ea", font=font_answers).place(x=20, y=100)
 		tk.Label(root, text='Opciones: ', bg="#dfe4ea", font=font_answers).place(x=20, y=150)
 		rImg = tk.PhotoImage(file="img/stock.png")
 		tk.Button(root, text="Revisar Reservas", font=font_answers, bg="#eccc68", command=bookings).place(x=20, y=200, width=180)
