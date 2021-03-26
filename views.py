@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import StringVar
 from tkinter import messagebox
+from tkinter import ttk
 
 
 class Views:
@@ -57,6 +58,10 @@ class Views:
 			root.destroy()
 			self.facturation()
 
+		def extendrecords():
+			root.destroy()
+			self.extendRecords()
+
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
 		font_answers = ("Arial", 15)
@@ -79,7 +84,7 @@ class Views:
 		tk.Button(root, text="Eliminar Reservas", font=font_answers, bg="#eccc68", command=delete).place(x=20, y=250, width=180)
 		tk.Label(root, image=dImg, bg="#eccc68").place(x=204, y=252, height=35)
 		sImg = tk.PhotoImage(file="img/stock.png")
-		tk.Button(root, text="Registro Extendido", font=font_answers, bg="#eccc68").place(x=20, y=300, width=180)
+		tk.Button(root, text="Registro Extendido", font=font_answers, bg="#eccc68", command=extendrecords).place(x=20, y=300, width=180)
 		tk.Label(root, image=sImg, bg="#eccc68").place(x=204, y=302, height=35)
 		fImg = tk.PhotoImage(file="img/invoice.png")
 		tk.Button(root, text="Facturación", font=font_answers, bg="#eccc68", command=facturation).place(x=20, y=350, width=180)
@@ -112,7 +117,7 @@ class Views:
 		def pay():
 			if condition.get() == "Pendiente":
 				condition.set("Activo")
-				messagebox.showinfo(message="Pago efectuado.", title="Proceso exitoso")
+				messagebox.showinfo(message='Estado cambiado a "ACTIVO".', title="Proceso exitoso")
 			else:
 				messagebox.showerror(message="Error", title="Error")
 
@@ -195,7 +200,7 @@ class Views:
 		to.configure(state='disabled')
 		to.place(x=510, y=380, width=200)
 
-		tk.Button(root, text="Efectuar Pago", font=font_answers, bg="#eccc68", command=pay).place(x=300, y=430)
+		tk.Button(root, text="Activar", font=font_answers, bg="#eccc68", command=pay).place(x=330, y=430)
 
 		root.mainloop()
 
@@ -370,5 +375,64 @@ class Views:
 		cd.place(x=270, y=380, width=200)
 
 		tk.Button(root, text="Efectuar Pago", font=font_answers, bg="#eccc68").place(x=150, y=430)
+
+		root.mainloop()
+
+	def extendRecords(self):
+		def exit():
+		    root.destroy()
+		    self.index()
+		def showExtendRecord():
+		    table.insert("", tk.END , text="" , values=("Fredys", "Muriel", "1001947524", "19", "21/05/2021","25/05/2021","P1 H3"))
+		    table.insert("", tk.END , text="" , values=("Fredys", "Muriel", "1001947524", "19", "21/05/2021","25/05/2021","P1 H3"))
+		    table.insert("", tk.END , text="" , values=("Fredys", "Muriel", "1001947524", "19", "21/05/2021","25/05/2021","P1 H3"))
+
+
+		title = ("Arial", 20)
+		font_base = ("Arial", 18)
+		font_answers = ("Arial", 15)
+
+		root = tk.Tk()
+		root.title("Login")
+		root.config(bg="#dfe4ea")
+		root.geometry("800x500+300+100")
+		root.resizable(0,0)
+		root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(file = "img/revision.png"))
+		tk.Label(root, text='Administración "Hotel Girasol"', bg="#eccc68", font=title).place(x=0, y=0, width=800, height=70)
+
+		tk.Button(root, text="Inicio", font=font_base, bg="#eccc68", command=exit).place(x=700, y=90)
+
+		tk.Button(root, text="Ver Registro Extendido", font=font_base, bg="#eccc68", command=showExtendRecord).place(x=110, y=130)
+
+		frame = tk.Frame(root)
+
+		sb = tk.Scrollbar(frame)
+		sb.pack(side = tk.RIGHT, fill = tk.Y)
+
+		#table
+		table = ttk.Treeview(frame, columns=("name","lastName", "document", "age","inDate","outDate","room"), yscrollcommand = sb.set )
+
+		table.column("#0", width=5, minwidth=5)
+		table.column("name", width=80, minwidth=80)
+		table.column("lastName", width=80, minwidth=80)
+		table.column("document", width=100, minwidth=100)
+		table.column("age", width=50, minwidth=50)
+		table.column("inDate", width=80, minwidth=80)
+		table.column("outDate", width=80, minwidth=80)
+		table.column("room", width=100, minwidth=100)
+
+		table.heading("#0", text="#", anchor="w")
+		table.heading("name",text="Nombre", anchor="w")
+		table.heading("lastName",text="Apellido", anchor="w")
+		table.heading("document",text="# Documento", anchor="w")
+		table.heading("age",text="Edad", anchor="w")
+		table.heading("inDate",text="Ingreso", anchor="w")
+		table.heading("outDate",text="Salida", anchor="w")
+		table.heading("room",text="Habitacion", anchor="w")
+
+		sb.config( command = table.yview )
+		table.pack(fill=tk.X, side=tk.LEFT, expand=False)
+
+		frame.place(x=110, y=200)
 
 		root.mainloop()
