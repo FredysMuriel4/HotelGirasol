@@ -3,13 +3,17 @@ from tkinter import StringVar
 from tkinter import messagebox
 from tkinter import ttk
 
+from queries import database
+
+db = database()
+
 
 class Views:
 	def login(self):
 		def enter():
 			fun_empty = empty(user.get(), password.get())
 			if fun_empty != 0:
-				if user.get() == "Admin" and password.get() == "Administracion":
+				if user.get() == "a" and password.get() == "a":
 					root.destroy()
 					global username
 					username = user.get()
@@ -98,28 +102,33 @@ class Views:
 			self.index()
 
 		def show():
-			if userId.get() == "1001947524":
+			userData = db.obtainUserData(userId.get())
+			global globalUserId
+			globalUserId = userId.get()
+			name.set(userData[1])
+			lastName.set(userData[2])
+			reserveData = db.obtainReserveData(userData[0])
+			if reserveData[8] == 1:
 				condition.set("Pendiente")
-				name.set("Fredys")
-				last_name.set("Muriel")
-				age.set("19 años")
-				tel.set("3016335538")
-				r_day.set("14/03/2021")
-				c_day.set("5")
-				t_room.set("Empresarial")
-				night_p.set("250000")
-				calc_total = int(night_p.get()) * int(c_day.get())
-				total.set(str(calc_total))
-				userId.set("")
-			else:
-				messagebox.showerror(message="No se ha encontrado el documento.", title="Error")
+			elif reserveData[8] == 2:
+				condition.set("Activo")
+			childsQuant.set(str(reserveData[6]) + " Niños")
+			dadsQuant.set(str(reserveData[5]) + " Adultos")
+			bedQuant.set(str(reserveData[4]) + " Camas")
+			nightQuant.set(str(reserveData[3]) + " Noches")
+			inDate.set(reserveData[1])
+			outDate.set(reserveData[2])
+			idBooking.set("# Reserva: " + str(reserveData[0]))
+			userId.set('')
 
-		def pay():
+		def activate():
 			if condition.get() == "Pendiente":
 				condition.set("Activo")
+				userIdObtain = db.obtainUserData(globalUserId)
+				db.changeStatus(userIdObtain[0])
 				messagebox.showinfo(message='Estado cambiado a "ACTIVO".', title="Proceso exitoso")
-			else:
-				messagebox.showerror(message="Error", title="Error")
+			elif condition.get() == "Activo":
+				messagebox.showerror(message="Error, el usuario ya está activado", title="Error")
 
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
@@ -152,55 +161,55 @@ class Views:
 		n.configure(state='disabled')
 		n.place(x=30, y=260, width=200)
 
-		last_name = StringVar()
-		ln = tk.Entry(root, textvariable = last_name, bg="#ced6e0", font=font_answers)
+		lastName = StringVar()
+		ln = tk.Entry(root, textvariable = lastName, bg="#ced6e0", font=font_answers)
 		ln.insert(0,"Apellido")
 		ln.configure(state='disabled')
 		ln.place(x=270, y=260, width=200)
 
-		age = StringVar()
-		a = tk.Entry(root, textvariable = age, bg="#ced6e0", font=font_answers)
-		a.insert(0,"Edad")
+		childsQuant = StringVar()
+		a = tk.Entry(root, textvariable = childsQuant, bg="#ced6e0", font=font_answers)
+		a.insert(0,"Cantidad Niños")
 		a.configure(state='disabled')
 		a.place(x=510, y=260, width=200)
 
-		tel = StringVar()
-		t = tk.Entry(root, textvariable = tel, bg="#ced6e0", font=font_answers)
-		t.insert(0,"Teléfono")
+		dadsQuant = StringVar()
+		t = tk.Entry(root, textvariable = dadsQuant, bg="#ced6e0", font=font_answers)
+		t.insert(0,"Cantidad Adultos")
 		t.configure(state='disabled')
 		t.place(x=30, y=320, width=200)
 
-		r_day = StringVar()
-		rd = tk.Entry(root, textvariable = r_day, bg="#ced6e0", font=font_answers)
-		rd.insert(0,"Día de reserva")
+		bedQuant = StringVar()
+		rd = tk.Entry(root, textvariable = bedQuant, bg="#ced6e0", font=font_answers)
+		rd.insert(0,"Cantidad Camas")
 		rd.configure(state='disabled')
 		rd.place(x=270, y=320, width=200)
 
-		c_day = StringVar()
-		cd = tk.Entry(root, textvariable = c_day, bg="#ced6e0", font=font_answers)
-		cd.insert(0,"Cantidad de días")
+		nightQuant = StringVar()
+		cd = tk.Entry(root, textvariable = nightQuant, bg="#ced6e0", font=font_answers)
+		cd.insert(0,"Cantidad Noches")
 		cd.configure(state='disabled')
 		cd.place(x=510, y=320, width=200)
 
-		t_room = StringVar()
-		tr = tk.Entry(root, textvariable = t_room, bg="#ced6e0", font=font_answers)
-		tr.insert(0,"Tipo de habitación")
+		inDate = StringVar()
+		tr = tk.Entry(root, textvariable = inDate, bg="#ced6e0", font=font_answers)
+		tr.insert(0,"Fecha Ingreso")
 		tr.configure(state='disabled')
 		tr.place(x=30, y=380, width=200)
 
-		night_p = StringVar()
-		np = tk.Entry(root, textvariable = night_p, bg="#ced6e0", font=font_answers)
-		np.insert(0,"Precio por noche")
-		np.configure(state='disabled')
-		np.place(x=270, y=380, width=200)
+		outDate = StringVar()
+		n = tk.Entry(root, textvariable = outDate, bg="#ced6e0", font=font_answers)
+		n.insert(0,"Fecha Salida")
+		n.configure(state='disabled')
+		n.place(x=270, y=380, width=200)
 
-		total = StringVar()
-		to = tk.Entry(root, textvariable = total, bg="#ced6e0", font=font_answers)
-		to.insert(0,"Total a pagar")
-		to.configure(state='disabled')
-		to.place(x=510, y=380, width=200)
+		idBooking = StringVar()
+		ln = tk.Entry(root, textvariable = idBooking, bg="#ced6e0", font=font_answers)
+		ln.insert(0,"# Reserva")
+		ln.configure(state='disabled')
+		ln.place(x=510, y=380, width=200)
 
-		tk.Button(root, text="Activar", font=font_answers, bg="#eccc68", command=pay).place(x=330, y=430)
+		tk.Button(root, text="Activar", font=font_answers, bg="#eccc68", command=activate).place(x=330, y=430)
 
 		root.mainloop()
 
@@ -210,30 +219,29 @@ class Views:
 			self.index()
 
 		def show():
-			if userId.get() == "1001947524":
+			userDataToDelete = db.obtainUserDataToDelete(int(userId.get()))
+			global userIdToDelete
+			userIdToDelete = userDataToDelete[0]
+			name.set(userDataToDelete[1])
+			lastName.set(userDataToDelete[2])
+			email.set(userDataToDelete[3])
+			tel.set(userDataToDelete[4])
+			reserveDataToDelete = db.obtainReserveDataToDelete(userDataToDelete[0])
+			global reserveIdToDelete
+			reserveIdToDelete = reserveDataToDelete[0]
+			if reserveDataToDelete[8] == 1:
+				condition.set("Pendiente")
+			elif reserveDataToDelete[8] == 2:
 				condition.set("Activo")
-				name.set("Fredys")
-				last_name.set("Muriel")
-				age.set("19 años")
-				tel.set("3016335538")
-				r_day.set("14/03/2021")
-				c_day.set("5")
-				t_room.set("Empresarial")
-				userId.set("")
-			else:
-				messagebox.showerror(message="No se ha encontrado el documento.", title="Error")
+			inDate.set(reserveDataToDelete[1])
+			outDate.set(reserveDataToDelete[2])
+			roomIdToDelete = db.obtainRoomIdToDelete(reserveDataToDelete[0])
+			roomId.set("# Habitación " + str(roomIdToDelete[0]))
 
 		def delete():
-				condition.set("")
-				name.set("")
-				last_name.set("")
-				age.set("")
-				tel.set("")
-				r_day.set("")
-				c_day.set("")
-				t_room.set("")
-				userId.set("")
+				db.deleteReserves(userIdToDelete, reserveIdToDelete)
 				messagebox.showinfo(message="Eliminación exitosa")
+				self.index()
 
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
@@ -266,15 +274,15 @@ class Views:
 		n.configure(state='disabled')
 		n.place(x=30, y=260, width=200)
 
-		last_name = StringVar()
-		ln = tk.Entry(root, textvariable = last_name, bg="#ced6e0", font=font_answers)
+		lastName = StringVar()
+		ln = tk.Entry(root, textvariable = lastName, bg="#ced6e0", font=font_answers)
 		ln.insert(0,"Apellido")
 		ln.configure(state='disabled')
 		ln.place(x=270, y=260, width=200)
 
-		age = StringVar()
-		a = tk.Entry(root, textvariable = age, bg="#ced6e0", font=font_answers)
-		a.insert(0,"Edad")
+		email = StringVar()
+		a = tk.Entry(root, textvariable = email, bg="#ced6e0", font=font_answers)
+		a.insert(0,"Correo")
 		a.configure(state='disabled')
 		a.place(x=510, y=260, width=200)
 
@@ -284,21 +292,21 @@ class Views:
 		t.configure(state='disabled')
 		t.place(x=30, y=320, width=200)
 
-		r_day = StringVar()
-		rd = tk.Entry(root, textvariable = r_day, bg="#ced6e0", font=font_answers)
-		rd.insert(0,"Día de reserva")
+		inDate = StringVar()
+		rd = tk.Entry(root, textvariable = inDate, bg="#ced6e0", font=font_answers)
+		rd.insert(0,"Fecha Ingreso")
 		rd.configure(state='disabled')
 		rd.place(x=270, y=320, width=200)
 
-		c_day = StringVar()
-		cd = tk.Entry(root, textvariable = c_day, bg="#ced6e0", font=font_answers)
-		cd.insert(0,"Cantidad de días")
+		outDate = StringVar()
+		cd = tk.Entry(root, textvariable = outDate, bg="#ced6e0", font=font_answers)
+		cd.insert(0,"Fecha Salida")
 		cd.configure(state='disabled')
 		cd.place(x=510, y=320, width=200)
 
-		t_room = StringVar()
-		tr = tk.Entry(root, textvariable = t_room, bg="#ced6e0", font=font_answers)
-		tr.insert(0,"Tipo de habitación")
+		roomId = StringVar()
+		tr = tk.Entry(root, textvariable = roomId, bg="#ced6e0", font=font_answers)
+		tr.insert(0,"# Habitacion")
 		tr.configure(state='disabled')
 		tr.place(x=30, y=380, width=200)
 
@@ -310,6 +318,23 @@ class Views:
 		def index():
 			root.destroy()
 			self.index()
+		def validate():
+			userData = db.obtainUserData(userId.get())
+			reserveData = db.obtainReserveData(userData[0])
+			if reserveData[8] == 2:
+				condition.set("Activo")
+				n.config(state='normal')
+				ln.config(state='normal')
+				a.config(state='normal')
+				t.config(state='normal')
+			else:
+				messagebox.showerror(message="Error, no se encontró al usuario", title="Error")
+
+		def saveInvoice():
+			if condition.get() == "Activo":
+				db.executeInvoice(int(userId.get()), specialRequest.get(), concept.get(), value.get(), total.get())
+				messagebox.showinfo(message="Factura exitosa.", title="Facturación exitosa")
+				index()
 
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
@@ -328,54 +353,39 @@ class Views:
 
 		userId = StringVar()
 		tk.Entry(root, textvariable = userId, bg="#ced6e0", font=font_answers).place(x=150, y=150, width=300)
-		tk.Button(root, text="Consultar",  font=font_answers, bg="#eccc68").place(x=320, y=190)
+		tk.Button(root, text="Consultar",  font=font_answers, bg="#eccc68", command=validate).place(x=320, y=190)
+		
+		condition = StringVar()
+		c = tk.Entry(root, textvariable = condition, bg="#ced6e0", font=font_answers)
+		c.insert(0,"Estado")
+		c.configure(state='disabled')
+		c.place(x=30, y=190, width=100)
 
-		name = StringVar()
-		n = tk.Entry(root, textvariable = name, bg="#ced6e0", font=font_answers)
-		n.insert(0,"Nombre")
-		n.configure(state='disabled')
+		specialRequest = StringVar()
+		n = tk.Entry(root, textvariable = specialRequest, bg="#ced6e0", font=font_answers)
+		n.insert(0,"Solicitud Especial ")
+		n.config(state='readonly')
 		n.place(x=30, y=260, width=200)
 
-		last_name = StringVar()
-		ln = tk.Entry(root, textvariable = last_name, bg="#ced6e0", font=font_answers)
-		ln.insert(0,"Apellido")
-		ln.configure(state='disabled')
+		concept = StringVar()
+		ln = tk.Entry(root, textvariable = concept, bg="#ced6e0", font=font_answers)
+		ln.insert(0,"Concepto")
+		ln.config(state='readonly')
 		ln.place(x=270, y=260, width=200)
 
-		peoples = StringVar()
-		cp = tk.Entry(root, textvariable = peoples, bg="#ced6e0", font=font_answers)
-		cp.insert(0,"Cantidad de personas")
-		cp.configure(state='disabled')
-		cp.place(x=30, y=320, width=200)
-
-		t_room = StringVar()
-		tr = tk.Entry(root, textvariable = t_room, bg="#ced6e0", font=font_answers)
-		tr.insert(0,"Tipo de habitación")
-		tr.configure(state='disabled')
-		tr.place(x=270, y=320, width=200)
-
-		tk.Label(root, text="Total ", bg="#dfe4ea", font=font_answers).place(x=510, y=280)
+		value = StringVar()
+		a = tk.Entry(root, textvariable = value, bg="#ced6e0", font=font_answers)
+		a.insert(0,"Valor")
+		a.config(state='readonly')
+		a.place(x=30, y=320, width=200)
 
 		total = StringVar()
-		np = tk.Entry(root, textvariable = total, bg="#ced6e0", font=font_answers)
-		np.insert(0,"$0")
-		np.configure(state='disabled')
-		np.place(x=510, y=320, width=200)
+		t = tk.Entry(root, textvariable = total, bg="#ced6e0", font=font_answers)
+		t.insert(0,"Total")
+		t.config(state='readonly')
+		t.place(x=270, y=320, width=200)
 
-		p_day = StringVar()
-		pd = tk.Entry(root, textvariable = p_day, bg="#ced6e0", font=font_answers)
-		pd.insert(0,"Precio por día")
-		pd.configure(state='disabled')
-		pd.place(x=30, y=380, width=200)
-
-		c_days = StringVar()
-		cd = tk.Entry(root, textvariable = c_days, bg="#ced6e0", font=font_answers)
-		cd.insert(0,"Cantidad de días")
-		cd.configure(state='disabled')
-		cd.place(x=270, y=380, width=200)
-
-		tk.Button(root, text="Efectuar Pago", font=font_answers, bg="#eccc68").place(x=150, y=430)
-
+		tk.Button(root, text="Efectuar Pago", font=font_answers, bg="#eccc68", command=saveInvoice).place(x=530, y=270)
 		root.mainloop()
 
 	def extendRecords(self):
