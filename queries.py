@@ -110,6 +110,21 @@ class database:
 
 ######################################## ELIMINAR RESERVAS #########################################################################################################################
 
+######################################## REGISTRO EXTENDIDO #########################################################################################################################
+
+	def showUsers(self):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT * FROM registroextendido"
+		mycursor.execute(sql)
+
+		myresult = mycursor.fetchall()
+
+		for x in myresult:
+			data = x
+			
+
+######################################## REGISTRO EXTENDIDO #########################################################################################################################
+
 ######################################## FACTURACION #########################################################################################################################
 	def executeInvoice(self, idNumber, specialRequest, concept, value, total):
 		
@@ -147,6 +162,7 @@ class database:
 
 		for x in myresult:
 			idFound = x
+
 		return idFound[0]
 
 	def searchRoomId(self, reserveId):
@@ -160,5 +176,43 @@ class database:
 		for x in myresult:
 			idFound = x
 		return idFound[0]
+
+	def searchUserData(self, userId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT * FROM usuario WHERE Id_Usuario = %s"
+		adr = (userId, )
+		mycursor.execute(sql, adr)
+
+		myresult = mycursor.fetchall()
+
+		for x in myresult:
+			dataFound = x
+		return dataFound
+
+	def searchReserveData(self, userId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT * FROM reserva WHERE Id_Usuario = %s"
+		adr = (userId, )
+		mycursor.execute(sql, adr)
+
+		myresult = mycursor.fetchall()
+
+		for x in myresult:
+			dataFound = x
+
+		return dataFound
+
+
+	def insertIntoExtendRecord(self, name, lastName, numberId, inDate, outDate):
+		mycursor = hotelGirasolDB.cursor()
+
+		sql = "INSERT INTO registroextendido (Nombre, Apellido, Num_Documento, Fecha_Ingreso, Fecha_Salida) VALUES (%s, %s, %s, %s, %s)"
+
+		val = (name, lastName, numberId, inDate, outDate)
+
+		mycursor.execute(sql, val)
+
+		hotelGirasolDB.commit()
+
 
 ######################################## FACTURACION #########################################################################################################################

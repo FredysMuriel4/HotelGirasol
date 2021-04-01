@@ -102,12 +102,12 @@ class Views:
 			self.index()
 
 		def show():
-			userData = db.obtainUserData(userId.get())
+			userData = db.obtainUserData(int(userId.get()))
 			global globalUserId
 			globalUserId = userId.get()
 			name.set(userData[1])
 			lastName.set(userData[2])
-			reserveData = db.obtainReserveData(userData[0])
+			reserveData = db.obtainReserveData(int(userData[0]))
 			if reserveData[8] == 1:
 				condition.set("Pendiente")
 			elif reserveData[8] == 2:
@@ -320,6 +320,12 @@ class Views:
 			self.index()
 		def validate():
 			userData = db.obtainUserData(userId.get())
+
+			global userDataToInsertIntoExtendRecord
+			userDataToInsertIntoExtendRecord = db.searchUserData(userData[0])
+			global reserveDataToInsertIntoExtendRecord
+			reserveDataToInsertIntoExtendRecord = db.searchReserveData(userData[0])
+
 			reserveData = db.obtainReserveData(userData[0])
 			if reserveData[8] == 2:
 				condition.set("Activo")
@@ -333,6 +339,7 @@ class Views:
 		def saveInvoice():
 			if condition.get() == "Activo":
 				db.executeInvoice(int(userId.get()), specialRequest.get(), concept.get(), value.get(), total.get())
+				db.insertIntoExtendRecord(userDataToInsertIntoExtendRecord[1], userDataToInsertIntoExtendRecord[2], userDataToInsertIntoExtendRecord[6], reserveDataToInsertIntoExtendRecord[1], reserveDataToInsertIntoExtendRecord[2])
 				messagebox.showinfo(message="Factura exitosa.", title="Facturación exitosa")
 				index()
 
@@ -420,13 +427,12 @@ class Views:
 		sb.pack(side = tk.RIGHT, fill = tk.Y)
 
 		#table
-		table = ttk.Treeview(frame, columns=("name","lastName", "document", "age","inDate","outDate","room"), yscrollcommand = sb.set )
+		table = ttk.Treeview(frame, columns=("name","lastName", "document", "inDate","outDate","room"), yscrollcommand = sb.set )
 
 		table.column("#0", width=5, minwidth=5)
 		table.column("name", width=80, minwidth=80)
 		table.column("lastName", width=80, minwidth=80)
 		table.column("document", width=100, minwidth=100)
-		table.column("age", width=50, minwidth=50)
 		table.column("inDate", width=80, minwidth=80)
 		table.column("outDate", width=80, minwidth=80)
 		table.column("room", width=100, minwidth=100)
@@ -435,7 +441,6 @@ class Views:
 		table.heading("name",text="Nombre", anchor="w")
 		table.heading("lastName",text="Apellido", anchor="w")
 		table.heading("document",text="# Documento", anchor="w")
-		table.heading("age",text="Edad", anchor="w")
 		table.heading("inDate",text="Ingreso", anchor="w")
 		table.heading("outDate",text="Salida", anchor="w")
 		table.heading("room",text="Habitacion", anchor="w")
