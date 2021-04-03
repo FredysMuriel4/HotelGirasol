@@ -108,9 +108,9 @@ class Views:
 			name.set(userData[1])
 			lastName.set(userData[2])
 			reserveData = db.obtainReserveData(int(userData[0]))
-			if reserveData[8] == 1:
+			if reserveData[9] == 1:
 				condition.set("Pendiente")
-			elif reserveData[8] == 2:
+			elif reserveData[9] == 2:
 				condition.set("Activo")
 			childsQuant.set(str(reserveData[6]) + " Niños")
 			dadsQuant.set(str(reserveData[5]) + " Adultos")
