@@ -13,7 +13,7 @@ class Views:
 		def enter():
 			fun_empty = empty(user.get(), password.get())
 			if fun_empty != 0:
-				if user.get() == "a" and password.get() == "a":
+				if user.get() == "Administrador" and password.get() == "Administrador":
 					root.destroy()
 					global username
 					username = user.get()
