@@ -327,7 +327,6 @@ class Views:
 			reserveDataToInsertIntoExtendRecord = db.searchReserveData(userData[0])
 
 			reserveData = db.obtainReserveData(userData[0])
-			print(reserveData)
 			if reserveData[9] == 2:
 				condition.set("Activo")
 				n.config(state='normal')
