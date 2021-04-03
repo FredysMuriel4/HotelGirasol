@@ -229,9 +229,9 @@ class Views:
 			reserveDataToDelete = db.obtainReserveDataToDelete(userDataToDelete[0])
 			global reserveIdToDelete
 			reserveIdToDelete = reserveDataToDelete[0]
-			if reserveDataToDelete[8] == 1:
+			if reserveDataToDelete[9] == 1:
 				condition.set("Pendiente")
-			elif reserveDataToDelete[8] == 2:
+			elif reserveDataToDelete[9] == 2:
 				condition.set("Activo")
 			inDate.set(reserveDataToDelete[1])
 			outDate.set(reserveDataToDelete[2])
@@ -241,7 +241,7 @@ class Views:
 		def delete():
 				db.deleteReserves(userIdToDelete, reserveIdToDelete)
 				messagebox.showinfo(message="Eliminación exitosa")
-				self.index()
+				index()
 
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
@@ -327,7 +327,8 @@ class Views:
 			reserveDataToInsertIntoExtendRecord = db.searchReserveData(userData[0])
 
 			reserveData = db.obtainReserveData(userData[0])
-			if reserveData[8] == 2:
+			print(reserveData)
+			if reserveData[9] == 2:
 				condition.set("Activo")
 				n.config(state='normal')
 				ln.config(state='normal')
@@ -400,10 +401,12 @@ class Views:
 		    root.destroy()
 		    self.index()
 		def showExtendRecord():
-		    table.insert("", tk.END , text="" , values=("Fredys", "Muriel", "1001947524", "19", "21/05/2021","25/05/2021","P1 H3"))
-		    table.insert("", tk.END , text="" , values=("Fredys", "Muriel", "1001947524", "19", "21/05/2021","25/05/2021","P1 H3"))
-		    table.insert("", tk.END , text="" , values=("Fredys", "Muriel", "1001947524", "19", "21/05/2021","25/05/2021","P1 H3"))
-
+			dataFromExtendRecords = db.showUsers()
+			for x in dataFromExtendRecords:
+				table.insert("", tk.END , text="" , values=(x[0], x[1], x[2], x[3] ,x[4]))
+				if x == '':
+					x = ''
+					break
 
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
@@ -427,7 +430,7 @@ class Views:
 		sb.pack(side = tk.RIGHT, fill = tk.Y)
 
 		#table
-		table = ttk.Treeview(frame, columns=("name","lastName", "document", "inDate","outDate","room"), yscrollcommand = sb.set )
+		table = ttk.Treeview(frame, columns=("name","lastName", "document", "inDate","outDate"), yscrollcommand = sb.set )
 
 		table.column("#0", width=5, minwidth=5)
 		table.column("name", width=80, minwidth=80)
@@ -435,7 +438,6 @@ class Views:
 		table.column("document", width=100, minwidth=100)
 		table.column("inDate", width=80, minwidth=80)
 		table.column("outDate", width=80, minwidth=80)
-		table.column("room", width=100, minwidth=100)
 
 		table.heading("#0", text="#", anchor="w")
 		table.heading("name",text="Nombre", anchor="w")
@@ -443,7 +445,6 @@ class Views:
 		table.heading("document",text="# Documento", anchor="w")
 		table.heading("inDate",text="Ingreso", anchor="w")
 		table.heading("outDate",text="Salida", anchor="w")
-		table.heading("room",text="Habitacion", anchor="w")
 
 		sb.config( command = table.yview )
 		table.pack(fill=tk.X, side=tk.LEFT, expand=False)

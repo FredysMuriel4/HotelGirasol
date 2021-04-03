@@ -10,7 +10,7 @@ class database:
 		host='127.0.0.1',
 		user='root',
 		password='',
-		database='hotel_girasol'
+		database='hotel_girasol2'
 	)
 
 ######################################## RESERVAS #########################################################################################################################
@@ -119,8 +119,13 @@ class database:
 
 		myresult = mycursor.fetchall()
 
+		recordsList = []
+
 		for x in myresult:
 			data = x
+			recordsList.append(data)
+
+		return recordsList
 			
 
 ######################################## REGISTRO EXTENDIDO #########################################################################################################################
