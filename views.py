@@ -18,6 +18,8 @@ class Views:
 					global username
 					username = user.get()
 					self.index()
+				else:
+					messagebox.showerror(message="Usuario o conraseña incorrectos, verifique", title="Error")
 			else:
 				messagebox.showerror(message="Usuario o conraseña incorrectos, verifique", title="Error")
 		def empty(user, password):
@@ -100,35 +102,33 @@ class Views:
 		def index():
 			root.destroy()
 			self.index()
-
-		def show():
-			userData = db.obtainUserData(int(userId.get()))
-			global globalUserId
-			globalUserId = userId.get()
-			name.set(userData[1])
-			lastName.set(userData[2])
-			reserveData = db.obtainReserveData(int(userData[0]))
-			if reserveData[9] == 1:
-				condition.set("Pendiente")
-			elif reserveData[9] == 2:
-				condition.set("Activo")
-			childsQuant.set(str(reserveData[6]) + " Niños")
-			dadsQuant.set(str(reserveData[5]) + " Adultos")
-			bedQuant.set(str(reserveData[4]) + " Camas")
-			nightQuant.set(str(reserveData[3]) + " Noches")
-			inDate.set(reserveData[1])
-			outDate.set(reserveData[2])
-			idBooking.set("# Reserva: " + str(reserveData[0]))
+		def search():
+			table.delete(*table.get_children())
+			global idNumber
+			idNumber = userId.get()
+			userData = db.obtainUserData(userId.get())
+			reservesObtained = db.obtainReserveId(userId.get())
+			name.set(userData[0])
+			lastName.set(userData[1])
+			cellphone.set(userData[2])
+			pos = 0
+			for reserve in reservesObtained:
+				pos += 1
+				reserveInfo = db.obtainReserveData(reserve[0])
+				for x in reserveInfo:
+					if x[6] == 1:
+						condition = "Pendiente"
+					elif x[6] == 2:
+						condition = "Activo"
+					table.insert("", tk.END , text="" , values=(pos, x[0], x[1], x[2], x[3], x[4], x[5], condition, reserve[0]))
 			userId.set('')
 
 		def activate():
-			if condition.get() == "Pendiente":
-				condition.set("Activo")
-				userIdObtain = db.obtainUserData(globalUserId)
-				db.changeStatus(userIdObtain[0])
-				messagebox.showinfo(message='Estado cambiado a "ACTIVO".', title="Proceso exitoso")
-			elif condition.get() == "Activo":
-				messagebox.showerror(message="Error, el usuario ya está activado", title="Error")
+			obtainReserveIdToActivate = db.obtainReserveId(idNumber)
+			for reserve in obtainReserveIdToActivate:
+				db.activateReserve(reserve[0])
+			messagebox.showinfo(message="Reservas activadas correctamente.", title="Activado")
+			index()
 
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
@@ -137,79 +137,73 @@ class Views:
 		root = tk.Tk()
 		root.title("Reservas")
 		root.config(bg="#dfe4ea")
-		root.geometry("800x500+300+100")
+		root.geometry("770x500+300+100")
 		root.resizable(0,0)
 		root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(file = "img/revision.png"))
-		tk.Label(root, text='Administración "Hotel Girasol"', bg="#eccc68", font=title).place(x=0, y=0, width=800, height=70)
+		tk.Label(root, text='Administración "Hotel Girasol"', bg="#eccc68", font=title).place(x=0, y=0, width=770, height=70)
 
-		tk.Button(root, text="Inicio", font=font_base, bg="#eccc68", command=index).place(x=700, y=90)
-		tk.Label(root, text="Identificacion ", bg="#dfe4ea", font=font_answers).place(x=20, y=150)
+		tk.Button(root, text="Inicio", font=font_base, bg="#eccc68", command=index).place(x=670, y=10)
+		tk.Label(root, text="Identificacion ", bg="#dfe4ea", font=font_answers).place(x=20, y=100)
 
 		userId = StringVar()
-		tk.Entry(root, textvariable = userId, bg="#ced6e0", font=font_answers).place(x=150, y=150, width=300)
-		tk.Button(root, text="Consultar",  font=font_answers, bg="#eccc68", command=show).place(x=320, y=190)
-
-		condition = StringVar()
-		c = tk.Entry(root, textvariable = condition, bg="#ced6e0", font=font_answers)
-		c.insert(0,"Estado")
-		c.configure(state='disabled')
-		c.place(x=30, y=190, width=100)
+		tk.Entry(root, textvariable = userId, bg="#ced6e0", font=font_answers).place(x=150, y=100, width=250,  height=30)
+		tk.Button(root, text="Consultar",  font=font_answers, bg="#eccc68", command=search).place(x=450, y=95)
 
 		name = StringVar()
 		n = tk.Entry(root, textvariable = name, bg="#ced6e0", font=font_answers)
 		n.insert(0,"Nombre")
 		n.configure(state='disabled')
-		n.place(x=30, y=260, width=200)
+		n.place(x=30, y=170, width=128)
 
 		lastName = StringVar()
 		ln = tk.Entry(root, textvariable = lastName, bg="#ced6e0", font=font_answers)
 		ln.insert(0,"Apellido")
 		ln.configure(state='disabled')
-		ln.place(x=270, y=260, width=200)
+		ln.place(x=230, y=170, width=128)
 
-		childsQuant = StringVar()
-		a = tk.Entry(root, textvariable = childsQuant, bg="#ced6e0", font=font_answers)
-		a.insert(0,"Cantidad Niños")
+		cellphone = StringVar()
+		a = tk.Entry(root, textvariable = cellphone, bg="#ced6e0", font=font_answers)
+		a.insert(0,"Teléfono")
 		a.configure(state='disabled')
-		a.place(x=510, y=260, width=200)
+		a.place(x=430, y=170, width=128)
 
-		dadsQuant = StringVar()
-		t = tk.Entry(root, textvariable = dadsQuant, bg="#ced6e0", font=font_answers)
-		t.insert(0,"Cantidad Adultos")
-		t.configure(state='disabled')
-		t.place(x=30, y=320, width=200)
+		frame = tk.Frame(root)
 
-		bedQuant = StringVar()
-		rd = tk.Entry(root, textvariable = bedQuant, bg="#ced6e0", font=font_answers)
-		rd.insert(0,"Cantidad Camas")
-		rd.configure(state='disabled')
-		rd.place(x=270, y=320, width=200)
+		sb = tk.Scrollbar(frame)
+		sb.pack(side = tk.RIGHT, fill = tk.Y)
 
-		nightQuant = StringVar()
-		cd = tk.Entry(root, textvariable = nightQuant, bg="#ced6e0", font=font_answers)
-		cd.insert(0,"Cantidad Noches")
-		cd.configure(state='disabled')
-		cd.place(x=510, y=320, width=200)
+		#table
+		table = ttk.Treeview(frame, columns=("#","childs","adults", "beeds", "nights", "inDate", "outDate", "condition", "reserveId"), yscrollcommand = sb.set )
 
-		inDate = StringVar()
-		tr = tk.Entry(root, textvariable = inDate, bg="#ced6e0", font=font_answers)
-		tr.insert(0,"Fecha Ingreso")
-		tr.configure(state='disabled')
-		tr.place(x=30, y=380, width=200)
+		table.column("#0", width=0, minwidth=0)
+		table.column("#", width=25, minwidth=25)
+		table.column("childs", width=50, minwidth=50, anchor="c")
+		table.column("adults", width=50, minwidth=50, anchor="c")
+		table.column("beeds", width=50, minwidth=50, anchor="c")
+		table.column("nights", width=50, minwidth=50, anchor="c")
+		table.column("inDate", width=100, minwidth=100)
+		table.column("outDate", width=100, minwidth=100)
+		table.column("condition", width=80, minwidth=80)
+		table.column("reserveId", width=80, minwidth=80, anchor="c")
 
-		outDate = StringVar()
-		n = tk.Entry(root, textvariable = outDate, bg="#ced6e0", font=font_answers)
-		n.insert(0,"Fecha Salida")
-		n.configure(state='disabled')
-		n.place(x=270, y=380, width=200)
 
-		idBooking = StringVar()
-		ln = tk.Entry(root, textvariable = idBooking, bg="#ced6e0", font=font_answers)
-		ln.insert(0,"# Reserva")
-		ln.configure(state='disabled')
-		ln.place(x=510, y=380, width=200)
+		table.heading("#0", text="", anchor="w")
+		table.heading("#", text="#", anchor="w")
+		table.heading("childs",text="Niños", anchor="w")
+		table.heading("adults",text="Adultos", anchor="w")
+		table.heading("beeds",text="Camas", anchor="w")
+		table.heading("nights",text="Noches", anchor="w")
+		table.heading("inDate",text="Fecha Entrada", anchor="w")
+		table.heading("outDate",text="Fecha Salida", anchor="w")
+		table.heading("condition", text="Estado", anchor="w")
+		table.heading("reserveId",text="# Reserva", anchor="w")
 
-		tk.Button(root, text="Activar", font=font_answers, bg="#eccc68", command=activate).place(x=330, y=430)
+		sb.config( command = table.yview )
+		table.pack(fill=tk.X, side=tk.LEFT, expand=False)
+
+		frame.place(x=30, y=230)
+
+		tk.Button(root, text="Activar", font=font_base, bg="#eccc68", command=activate).place(x=650, y=320)
 
 		root.mainloop()
 
@@ -226,17 +220,17 @@ class Views:
 			lastName.set(userDataToDelete[2])
 			email.set(userDataToDelete[3])
 			tel.set(userDataToDelete[4])
-			reserveDataToDelete = db.obtainReserveDataToDelete(userDataToDelete[0])
+			reserveDataToDelete = db.obtainReserveDataToDelete(userDataToDelete[5])
 			global reserveIdToDelete
 			reserveIdToDelete = reserveDataToDelete[0]
-			if reserveDataToDelete[9] == 1:
+			if reserveDataToDelete[8] == 1:
 				condition.set("Pendiente")
-			elif reserveDataToDelete[9] == 2:
+			elif reserveDataToDelete[8] == 2:
 				condition.set("Activo")
 			inDate.set(reserveDataToDelete[1])
 			outDate.set(reserveDataToDelete[2])
-			roomIdToDelete = db.obtainRoomIdToDelete(reserveDataToDelete[0])
-			roomId.set("# Habitación " + str(roomIdToDelete[0]))
+			roomIdToDelete = db.obtainRoomData(reserveDataToDelete[0])
+			roomId.set("# Habitación " + str(roomIdToDelete))
 
 		def delete():
 				db.deleteReserves(userIdToDelete, reserveIdToDelete)
@@ -318,81 +312,163 @@ class Views:
 		def index():
 			root.destroy()
 			self.index()
-		def validate():
-			userData = db.obtainUserData(userId.get())
+		
+		def search():
+			table.delete(*table.get_children())
+			userInfoToInvoice = db.userDataToInvoice(userId.get())
+			reserves = db.reserveIds(userId.get())
+			global userNumber
+			userNumber = userId.get()
+			pos = 0
+			for x in reserves:
+				pos += 1
+				reserveInfoToInvoice = db.reserveDataToInvoice(x[0])
 
-			global userDataToInsertIntoExtendRecord
-			userDataToInsertIntoExtendRecord = db.searchUserData(userData[0])
-			global reserveDataToInsertIntoExtendRecord
-			reserveDataToInsertIntoExtendRecord = db.searchReserveData(userData[0])
+				for reserveInfo in reserveInfoToInvoice:
+					if reserveInfo[2] == 2:
+						condition.set("Activo")
+						rooms = db.roomIds(x[0])
 
-			reserveData = db.obtainReserveData(userData[0])
-			if reserveData[9] == 2:
-				condition.set("Activo")
-				n.config(state='normal')
-				ln.config(state='normal')
-				a.config(state='normal')
-				t.config(state='normal')
-			else:
-				messagebox.showerror(message="Error, no se encontró al usuario", title="Error")
+						for roomId in rooms:
+							roomInfoToInvoice = db.roomDataToInvoice(roomId[0])
 
-		def saveInvoice():
-			if condition.get() == "Activo":
-				db.executeInvoice(int(userId.get()), specialRequest.get(), concept.get(), value.get(), total.get())
-				db.insertIntoExtendRecord(userDataToInsertIntoExtendRecord[1], userDataToInsertIntoExtendRecord[2], userDataToInsertIntoExtendRecord[6], reserveDataToInsertIntoExtendRecord[1], reserveDataToInsertIntoExtendRecord[2])
-				messagebox.showinfo(message="Factura exitosa.", title="Facturación exitosa")
-				index()
+							for roomInfo in roomInfoToInvoice:
+								table.insert("", tk.END , text="" , values=(pos, roomId[0], roomInfo[0], reserveInfo[1], reserveInfo[0], roomInfo[1], str(int(reserveInfo[0] * roomInfo[1]))))
+
+						name.set(userInfoToInvoice[1])
+						lastName.set(userInfoToInvoice[2])
+						cellphone.set(userInfoToInvoice[3])
+
+			calcTotal = 0
+			for child in table.get_children():
+				calcTotal += int(table.item(child)["values"][6])
+			total.set(str(calcTotal))
+			userId.set('')
+
+		def checkIn():
+			userInfoToSaveInvoice = db.userDataToInvoice(userNumber)
+			reservesToSave = db.reserveIds(userNumber)
+			pos = 0
+			for x in reservesToSave:
+				db.saveInvoiceDetails(name.get(), lastName.get(), cellphone.get(), total.get(), x[0])
+
+			reserveIdList = []
+			pos = 0
+
+			for child in table.get_children():
+
+				for reserveIdObtain in reservesToSave:
+
+					r = reserveIdObtain[0]
+					reserveIdList.append(r)
+
+				db.saveRoomDetails(table.item(child)["values"][1], table.item(child)["values"][2], table.item(child)["values"][3], table.item(child)["values"][4], table.item(child)["values"][5], table.item(child)["values"][6], reserveIdList[pos])
+				pos +=1
+			idProductsList = []
+			idInvoiceList = []
+			pos = 0
+			for idInfo in reservesToSave:
+				for x in idInfo:
+					pass
+					for idProducts in db.obtainProductIdSaved(x):
+						idProductsList.append(idProducts[0])	
+					for idInvoices in db.obtainInvoiceIdSaved(x):
+						idInvoiceList.append(idInvoices[0])
+				db.insertIntoExtendRecord(db.obtainUserInformation(idInfo[0])[0], 
+					db.obtainUserInformation(idInfo[0])[1],
+					db.obtainUserInformation(idInfo[0])[2],
+					db.obtainReserveInformation(idInfo[0])[0],
+					db.obtainReserveInformation(idInfo[0])[1],
+					db.obtainReserveInformation(idInfo[0])[2])
+				db.saveInvoice(idProductsList[pos], idInvoiceList[pos])
+				pos += 1
+			messagebox.showinfo(message="Factura realizada exitosamente.", title="Exito.")
+			index()
+
 
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
 		font_answers = ("Arial", 15)
 
 		root = tk.Tk()
-		root.title("Reservas")
+		root.title("Facturar")
 		root.config(bg="#dfe4ea")
-		root.geometry("800x500+300+100")
+		root.geometry("800x520+300+100")
 		root.resizable(0,0)
 		root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(file = "img/revision.png"))
 		tk.Label(root, text='Administración "Hotel Girasol"', bg="#eccc68", font=title).place(x=0, y=0, width=800, height=70)
 
-		tk.Button(root, text="Inicio", font=font_base, bg="#eccc68", command=index).place(x=700, y=90)
-		tk.Label(root, text="Identificacion ", bg="#dfe4ea", font=font_answers).place(x=20, y=150)
+		tk.Button(root, text="Atrás", font=font_base, bg="#eccc68", command=index).place(x=700, y=10)
+
+		tk.Label(root, text="Identificacion ", bg="#dfe4ea", font=font_answers).place(x=20, y=100)
 
 		userId = StringVar()
-		tk.Entry(root, textvariable = userId, bg="#ced6e0", font=font_answers).place(x=150, y=150, width=300)
-		tk.Button(root, text="Consultar",  font=font_answers, bg="#eccc68", command=validate).place(x=320, y=190)
-		
+		tk.Entry(root, textvariable = userId, bg="#ced6e0", font=font_answers).place(x=150, y=100, width=250, height=30)
+		tk.Button(root, text="Consultar",  font=font_answers, bg="#eccc68", command=search).place(x=450, y=95)
+
 		condition = StringVar()
 		c = tk.Entry(root, textvariable = condition, bg="#ced6e0", font=font_answers)
 		c.insert(0,"Estado")
 		c.configure(state='disabled')
-		c.place(x=30, y=190, width=100)
+		c.place(x=30, y=140, width=100)
 
-		specialRequest = StringVar()
-		n = tk.Entry(root, textvariable = specialRequest, bg="#ced6e0", font=font_answers)
-		n.insert(0,"Solicitud Especial ")
-		n.config(state='readonly')
-		n.place(x=30, y=260, width=200)
+		name = StringVar()
+		n = tk.Entry(root, textvariable = name, bg="#ced6e0", font=font_answers)
+		n.insert(0,"Nombre")
+		n.configure(state='disabled')
+		n.place(x=30, y=200, width=128)
 
-		concept = StringVar()
-		ln = tk.Entry(root, textvariable = concept, bg="#ced6e0", font=font_answers)
-		ln.insert(0,"Concepto")
-		ln.config(state='readonly')
-		ln.place(x=270, y=260, width=200)
+		lastName = StringVar()
+		ln = tk.Entry(root, textvariable = lastName, bg="#ced6e0", font=font_answers)
+		ln.insert(0,"Apellido")
+		ln.configure(state='disabled')
+		ln.place(x=230, y=200, width=128)
 
-		value = StringVar()
-		a = tk.Entry(root, textvariable = value, bg="#ced6e0", font=font_answers)
-		a.insert(0,"Valor")
-		a.config(state='readonly')
-		a.place(x=30, y=320, width=200)
+		cellphone = StringVar()
+		a = tk.Entry(root, textvariable = cellphone, bg="#ced6e0", font=font_answers)
+		a.insert(0,"Teléfono")
+		a.configure(state='disabled')
+		a.place(x=430, y=200, width=128)
+
+		frame = tk.Frame(root)
+
+		sb = tk.Scrollbar(frame)
+		sb.pack(side = tk.RIGHT, fill = tk.Y)
+
+		#table
+		table = ttk.Treeview(frame, columns=("#","roomId","description", "beeds", "nights","price", "subTotal"), yscrollcommand = sb.set )
+
+		table.column("#0", width=0, minwidth=0)
+		table.column("#", width=25, minwidth=25)
+		table.column("roomId", width=80, minwidth=80, anchor="c")
+		table.column("description", width=180, minwidth=180)
+		table.column("beeds", width=50, minwidth=50, anchor="c")
+		table.column("nights", width=50, minwidth=50, anchor="c")
+		table.column("price", width=70, minwidth=70)
+		table.column("subTotal", width=80, minwidth=80)
+
+		table.heading("#0", text="", anchor="w")
+		table.heading("#", text="#", anchor="w")
+		table.heading("roomId",text="Habitación", anchor="w")
+		table.heading("description",text="Descripción", anchor="w")
+		table.heading("beeds",text="Camas", anchor="w")
+		table.heading("nights",text="Noches", anchor="w")
+		table.heading("price",text="Precio", anchor="w")
+		table.heading("subTotal",text="SubTotal", anchor="w")
+
+		sb.config( command = table.yview )
+		table.pack(fill=tk.X, side=tk.LEFT, expand=False)
+
+		frame.place(x=30, y=260)
 
 		total = StringVar()
-		t = tk.Entry(root, textvariable = total, bg="#ced6e0", font=font_answers)
-		t.insert(0,"Total")
-		t.config(state='readonly')
-		t.place(x=270, y=320, width=200)
+		a = tk.Entry(root, textvariable = total, bg="#ced6e0", font=font_answers)
+		a.insert(0,"Total")
+		a.configure(state='disabled')
+		a.place(x=640, y=330, width=100)
 
-		tk.Button(root, text="Efectuar Pago", font=font_answers, bg="#eccc68", command=saveInvoice).place(x=530, y=270)
+		tk.Button(root, text="Facturar", font=font_base, bg="#eccc68", command=checkIn).place(x=635, y=380)
+
 		root.mainloop()
 
 	def extendRecords(self):
@@ -400,12 +476,18 @@ class Views:
 		    root.destroy()
 		    self.index()
 		def showExtendRecord():
+			table.delete(*table.get_children())
 			dataFromExtendRecords = db.showUsers()
-			for x in dataFromExtendRecords:
-				table.insert("", tk.END , text="" , values=(x[0], x[1], x[2], x[3] ,x[4]))
-				if x == '':
-					x = ''
-					break
+			if dataFromExtendRecords == False:
+				messagebox.showerror(message="No se encontraron registros.", title="Error")
+			else:
+				pos = 0
+				for x in dataFromExtendRecords:
+					pos += 1
+					table.insert("", tk.END , text="" , values=(pos, x[0], x[1], x[2], x[3] ,x[4], x[5]))
+					if x == '':
+						x = ''
+						break
 
 		title = ("Arial", 20)
 		font_base = ("Arial", 18)
@@ -429,21 +511,25 @@ class Views:
 		sb.pack(side = tk.RIGHT, fill = tk.Y)
 
 		#table
-		table = ttk.Treeview(frame, columns=("name","lastName", "document", "inDate","outDate"), yscrollcommand = sb.set )
+		table = ttk.Treeview(frame, columns=("#","name","lastName", "document", "inDate","outDate", "roomId"), yscrollcommand = sb.set )
 
 		table.column("#0", width=5, minwidth=5)
+		table.column("#", width=30, minwidth=30, anchor="c")
 		table.column("name", width=80, minwidth=80)
 		table.column("lastName", width=80, minwidth=80)
 		table.column("document", width=100, minwidth=100)
 		table.column("inDate", width=80, minwidth=80)
 		table.column("outDate", width=80, minwidth=80)
+		table.column("roomId", width=80, minwidth=80, anchor="c")
 
-		table.heading("#0", text="#", anchor="w")
+		table.heading("#0", text="", anchor="w")
+		table.heading("#", text="#", anchor="c")
 		table.heading("name",text="Nombre", anchor="w")
 		table.heading("lastName",text="Apellido", anchor="w")
 		table.heading("document",text="# Documento", anchor="w")
 		table.heading("inDate",text="Ingreso", anchor="w")
 		table.heading("outDate",text="Salida", anchor="w")
+		table.heading("roomId", text="Habitación", anchor="w")
 
 		sb.config( command = table.yview )
 		table.pack(fill=tk.X, side=tk.LEFT, expand=False)

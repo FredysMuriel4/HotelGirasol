@@ -10,13 +10,14 @@ class database:
 		host='127.0.0.1',
 		user='root',
 		password='',
-		database='hotel_girasol2'
+		database='bdhotelgirasol'
 	)
 
 ######################################## RESERVAS #########################################################################################################################
+	
 	def obtainUserData(self, idNumber):
 		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT Id_Usuario, Nombre, Apellido FROM usuario WHERE Num_Documento = %s"
+		sql = "SELECT Nombre, Apellido, Telefono FROM usuario WHERE Num_Documento = %s"
 		adr = (idNumber, )
 
 		mycursor.execute(sql, adr)
@@ -27,34 +28,55 @@ class database:
 			dataFound = x
 		return dataFound
 
-	def obtainReserveData(self, idUser):
+	def obtainReserveId(self, idNumber):
 		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT * FROM reserva WHERE Id_Usuario = %s"
-		adr = (idUser, )
+		sql = "SELECT Id_Reserva FROM usuario WHERE Num_Documento = %s"
+		adr = (idNumber, )
 
 		mycursor.execute(sql, adr)
 
 		myresult = mycursor.fetchall()
 
+		reserves = []
+
 		for x in myresult:
 			dataFound = x
-		return dataFound
+			reserves.append(dataFound)
+		return reserves
 
-	def changeStatus(self, idUser):
+	def obtainReserveData(self, reserveId):
 		mycursor = hotelGirasolDB.cursor()
-		sql = "UPDATE reserva SET Estado = %s WHERE Id_Usuario = %s"
-		val = (2, idUser)
+		sql = "SELECT Cant_Ninos, Cant_Adulto, Cant_Camas, Cant_Noches, Fecha_Ingreso, Fecha_Salida, Estado  FROM reserva WHERE Id_Reserva = %s"
+		adr = (reserveId, )
 
-		mycursor.execute(sql, val)
+		mycursor.execute(sql, adr)
+
+		myresult = mycursor.fetchall()
+
+		reserves = []
+
+		for x in myresult:
+			dataFound = x
+			reserves.append(dataFound)
+		return reserves
+
+	def activateReserve(self, reserveId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "UPDATE reserva SET Estado = %s WHERE Id_Reserva = %s"
+		adr = (2, reserveId)
+
+		mycursor.execute(sql, adr)
 
 		hotelGirasolDB.commit()
+
+
 ######################################## RESERVAS #########################################################################################################################
 
 ######################################## ELIMINAR RESERVAS #########################################################################################################################
 
 	def obtainUserDataToDelete(self, idNumber):
 		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT Id_Usuario, Nombre, Apellido, Correo, Telefono FROM usuario WHERE Num_Documento = %s"
+		sql = "SELECT Id_Usuario, Nombre, Apellido, Correo, Telefono, Id_Reserva FROM usuario WHERE Num_Documento = %s"
 		adr = (idNumber, )
 
 		mycursor.execute(sql, adr)
@@ -67,7 +89,7 @@ class database:
 
 	def obtainReserveDataToDelete(self, idUser):
 		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT * FROM reserva WHERE Id_Usuario = %s"
+		sql = "SELECT * FROM reserva WHERE Id_Reserva = %s"
 		adr = (idUser, )
 
 		mycursor.execute(sql, adr)
@@ -78,9 +100,41 @@ class database:
 			dataFound = x
 		return dataFound
 
-	def obtainRoomIdToDelete(self, reserveId):
+	def obtainRoomData(self, idReserve):
 		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT Id_Habitacion FROM habitacion WHERE Id_Reserva = %s"
+		sql = "SELECT Id_Habitacion FROM reserva WHERE Id_Reserva = %s"
+		adr = (idReserve, )
+
+		mycursor.execute(sql, adr)
+
+		myresult = mycursor.fetchall()
+
+		for x in myresult:
+			dataFound = x
+		return dataFound[0]
+
+	def deleteReserves(self, userId, reserveId):
+		mycursor = hotelGirasolDB.cursor()
+
+		deleteUserInfo = "DELETE FROM usuario WHERE Id_Usuario = %s"
+		userInfo = (userId, )
+		deleteReserveInfo = "DELETE FROM reserva WHERE Id_Reserva = %s"
+		reserveInfo = (reserveId, )
+
+
+		mycursor.execute(deleteUserInfo, userInfo)
+		mycursor.execute(deleteReserveInfo, reserveInfo)
+
+		hotelGirasolDB.commit()
+
+
+######################################## ELIMINAR RESERVAS #########################################################################################################################
+
+######################################## REGISTRO EXTENDIDO #########################################################################################################################
+	
+	def obtainUserInformation(self, reserveId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT Nombre, Apellido, Num_Documento FROM usuario WHERE Id_Reserva = %s"
 		adr = (reserveId, )
 
 		mycursor.execute(sql, adr)
@@ -91,26 +145,27 @@ class database:
 			dataFound = x
 		return dataFound
 
-	def deleteReserves(self, userId, reserveId):
+	def obtainReserveInformation(self, reserveId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT Fecha_Ingreso, Fecha_Salida, Id_Habitacion FROM reserva WHERE Id_Reserva = %s"
+		adr = (reserveId, )
+
+		mycursor.execute(sql, adr)
+
+		myresult = mycursor.fetchall()
+
+		for x in myresult:
+			dataFound = x
+		return dataFound
+ 
+	def insertIntoExtendRecord(self, name, lastName, idNumber, inDate, outDate, roomId):
 		mycursor = hotelGirasolDB.cursor()
 
-		deleteUserInfo = "DELETE FROM usuario WHERE Id_Usuario = %s"
-		userInfo = (userId, )
-		deleteReserveInfo = "DELETE FROM reserva WHERE Id_Usuario = %s"
-		deleteRoomInfo = "DELETE FROM reserva WHERE Id_Usuario = %s"
-		roomInfo = (reserveId, )
+		sql = "INSERT INTO registroextendido (Nombre, Apellido, Num_Documento, Fecha_Ingreso, Fecha_Salida, Habitacion) VALUES (%s, %s, %s, %s, %s, %s)"
+		val = (name, lastName, idNumber, inDate, outDate, roomId)
+		mycursor.execute(sql, val)
 
-
-		mycursor.execute(deleteUserInfo, userInfo)
-		mycursor.execute(deleteReserveInfo, userInfo)
-		mycursor.execute(deleteRoomInfo, roomInfo)
-
-		hotelGirasolDB.commit()
-
-
-######################################## ELIMINAR RESERVAS #########################################################################################################################
-
-######################################## REGISTRO EXTENDIDO #########################################################################################################################
+		hotelGirasolDB.commit()	
 
 	def showUsers(self):
 		mycursor = hotelGirasolDB.cursor()
@@ -125,99 +180,158 @@ class database:
 			data = x
 			recordsList.append(data)
 
-		return recordsList
+		if recordsList == []:
+			return False
+		else:
+			return recordsList
 			
 
 ######################################## REGISTRO EXTENDIDO #########################################################################################################################
 
 ######################################## FACTURACION #########################################################################################################################
-	def executeInvoice(self, idNumber, specialRequest, concept, value, total):
-		
-		obtainId = self.searchUserId(idNumber)
-		obtainReserveId = self.searchReserveId(obtainId)
-		obtainRoomId = self.searchRoomId(obtainReserveId)
 
+	def userDataToInvoice(self, idNumber):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT Id_Usuario, Nombre, Apellido, Telefono from usuario where Num_Documento = %s"
+		user = (idNumber, )
+
+		mycursor.execute(sql, user)
+
+		myresult = mycursor.fetchall()
+
+		for x in myresult:
+			userData = x
+		return userData
+
+	def reserveIds(self, idNumber):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT Id_Reserva from usuario where Num_Documento = %s"
+		user = (idNumber, )
+
+		mycursor.execute(sql, user)
+
+		myresult = mycursor.fetchall()
+
+		reserves = []
+
+		for x in myresult:
+			data = x
+			reserves.append(data)
+
+		return reserves
+
+	def reserveDataToInvoice(self, reserveId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT Cant_Noches, Cant_Camas, Estado from reserva where Id_Reserva = %s"
+		user = (reserveId, )
+
+		mycursor.execute(sql, user)
+
+		myresult = mycursor.fetchall()
+
+		reserveData = []
+
+		for x in myresult:
+			userData = x
+			reserveData.append(userData)
+		return reserveData
+
+	def roomIds(self, reserveId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT Id_Habitacion from reserva where Id_Reserva = %s"
+		user = (reserveId, )
+
+		mycursor.execute(sql, user)
+
+		myresult = mycursor.fetchall()
+
+		rooms = []
+
+		for x in myresult:
+			data = x
+			rooms.append(data)
+
+		return rooms
+
+	def roomDataToInvoice(self, roomId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT Descripcion, Valor from habitacion where Id_Habitacion = %s"
+		user = (roomId, )
+
+		mycursor.execute(sql, user)
+
+		myresult = mycursor.fetchall()
+
+		roomList = []
+
+		for x in myresult:
+			roomData = x
+			roomList.append(roomData)
+		return roomList
+
+    ##########################################################################################################
+
+
+
+	def saveInvoiceDetails(self, name, lastName, cellphone, total, reserveId):
 		mycursor = hotelGirasolDB.cursor()
 
-		sql = "INSERT INTO factura (Solicitud_Especial, Concepto, Valor, Total, Id_Reserva, Id_Habitacion) VALUES (%s, %s, %s, %s, %s, %s)"
-		val = (specialRequest, concept, int(value), int(total), int(obtainReserveId), int(obtainRoomId))
+		sql = "INSERT INTO detallefactura (nombreCliente, apellidoCliente, telefonoCliente, totalFactura, idReserva) VALUES (%s, %s, %s, %s, %s)"
+		val = (name, lastName, cellphone, total, reserveId)
 		mycursor.execute(sql, val)
 
-		hotelGirasolDB.commit()
+		hotelGirasolDB.commit()	
 
-	def searchUserId(self, idNumber):
-		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT Id_Usuario FROM usuario WHERE Num_Documento = %s"
-		adr = (idNumber, )
-		mycursor.execute(sql, adr)
-
-		myresult = mycursor.fetchall()
-
-		for x in myresult:
-			idFound = x
-		return idFound[0]
-
-	def searchReserveId(self, userId):
-		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT Id_Reserva FROM reserva WHERE Id_Usuario = %s"
-		adr = (userId, )
-		mycursor.execute(sql, adr)
-
-		myresult = mycursor.fetchall()
-
-		for x in myresult:
-			idFound = x
-
-		return idFound[0]
-
-	def searchRoomId(self, reserveId):
-		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT Id_Habitacion FROM habitacion WHERE Id_Reserva = %s"
-		adr = (reserveId, )
-		mycursor.execute(sql, adr)
-
-		myresult = mycursor.fetchall()
-
-		for x in myresult:
-			idFound = x
-		return idFound[0]
-
-	def searchUserData(self, userId):
-		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT * FROM usuario WHERE Id_Usuario = %s"
-		adr = (userId, )
-		mycursor.execute(sql, adr)
-
-		myresult = mycursor.fetchall()
-
-		for x in myresult:
-			dataFound = x
-		return dataFound
-
-	def searchReserveData(self, userId):
-		mycursor = hotelGirasolDB.cursor()
-		sql = "SELECT * FROM reserva WHERE Id_Usuario = %s"
-		adr = (userId, )
-		mycursor.execute(sql, adr)
-
-		myresult = mycursor.fetchall()
-
-		for x in myresult:
-			dataFound = x
-
-		return dataFound
-
-
-	def insertIntoExtendRecord(self, name, lastName, numberId, inDate, outDate):
+	def saveRoomDetails(self, roomId, desciption, beeds, nights, value, subTotal, reserveId):
 		mycursor = hotelGirasolDB.cursor()
 
-		sql = "INSERT INTO registroextendido (Nombre, Apellido, Num_Documento, Fecha_Ingreso, Fecha_Salida) VALUES (%s, %s, %s, %s, %s)"
-
-		val = (name, lastName, numberId, inDate, outDate)
-
+		sql = "INSERT INTO detalleproducto (idHabitacion, descripcion, camas, noches, valor, subTotal, idReserva) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+		val = (roomId, desciption, beeds, nights, value, subTotal, reserveId)
 		mycursor.execute(sql, val)
 
-		hotelGirasolDB.commit()
+		hotelGirasolDB.commit()	
+
+	def obtainProductIdSaved(self, reserveId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT idDetalleProducto from detalleproducto where idReserva = %s"
+		user = (reserveId, )
+
+		mycursor.execute(sql, user)
+
+		myresult = mycursor.fetchall()
+
+		idList = []
+
+		for x in myresult:
+			roomData = x
+			idList.append(roomData)
+		return idList
+
+	def obtainInvoiceIdSaved(self, reserveId):
+		mycursor = hotelGirasolDB.cursor()
+		sql = "SELECT id_DetalleFactura from detallefactura where idReserva = %s"
+		user = (reserveId, )
+
+		mycursor.execute(sql, user)
+
+		myresult = mycursor.fetchall()
+
+		idList = []
+
+		for x in myresult:
+			roomData = x
+			idList.append(roomData)
+		return idList
+
+	def saveInvoice(self, productId, invoiceId):
+		mycursor = hotelGirasolDB.cursor()
+
+		sql = "INSERT INTO factura (idDetalleProducto, idDetalleFactura) VALUES (%s, %s)"
+		val = (productId, invoiceId)
+		mycursor.execute(sql, val)
+
+		hotelGirasolDB.commit()	
+
 
 
 ######################################## FACTURACION #########################################################################################################################
